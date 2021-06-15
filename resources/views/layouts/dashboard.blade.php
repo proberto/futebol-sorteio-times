@@ -172,8 +172,8 @@ function moeda(a, e, r, t) {
 
                     <div role="tabpanel" class="panel-collapse collapse" id="colListGroup3" aria-expanded="false">
                         <ul class="list-group">
-                            <li class="list-group-item"><a href="#">Confirmar</a></li>
-
+                            <li class="list-group-item"><a href="{{ route('presenca.create') }}">Confirmar</a></li>
+                            <li class="list-group-item"><a href="{{ route('presenca.index') }}">Lista de jogos</a></li>
                         </ul>
                         <div class="panel-footer"></div>
                     </div>
@@ -195,7 +195,8 @@ function moeda(a, e, r, t) {
 
                     <div role="tabpanel" class="panel-collapse collapse" id="colListGroup4" aria-expanded="false">
                         <ul class="list-group">
-                            <li class="list-group-item"><a href="#">Sortear Times</a></li>
+                            <li class="list-group-item"><a href="{{route('sorteio')}}">Sortear Times</a></li>
+                            <li class="list-group-item"><a href="#">Ver Times</a></li>
 
 
                         </ul>

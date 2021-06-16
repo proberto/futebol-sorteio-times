@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Jogador_Times;
 use App\Models\Jogo;
 use App\Models\Presenca;
+use App\Models\Time;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SorteioController extends Controller
 {
@@ -23,7 +27,7 @@ class SorteioController extends Controller
 
     public function sorteioTimes(Request $request)
     {
-        $jogo = $request['jogo'];
+        $jogo = Jogo::findorfail($request['jogo']);
         $mensagem = null;
         return view('sorteio.times', compact('jogo', 'mensagem'));
     }
@@ -44,8 +48,70 @@ class SorteioController extends Controller
             $numTimes = $numeroTimes;
         }
         else{
-            $numTimes = intval($numeroTimes) + 1;
+            $numTimes = intval($numeroTimes);
         }
 
+        $jogadores= DB::table('presencas')
+            ->join('jogadors','jogadors.id','presencas.id_jogador')
+            ->join('jogos','jogos.id','presencas.id_jogo')
+            ->select('jogadors.id', 'jogadors.name', 'jogadors.nivel', 'jogadors.goleiro')
+            ->where('jogos.id', $request['id_jogo'])
+            ->get();
+
+        $g = 0;
+        $j = 0;
+        foreach ($jogadores as $jogador)
+        {
+            if ($jogador->goleiro == true)
+            {
+                $gol[$g] = array('id' => $jogador->id, 'nome' => $jogador->name, 'nivel' => $jogador->nivel);
+                $g++;
+            }
+            else{
+                $jog[$j] = array('id' => $jogador->id, 'nome' => $jogador->name, 'nivel' => $jogador->nivel);
+                $j++;
+            }
+        }
+        for ($x = 0; $x < $numTimes; $x++)
+        {
+            $r = $x + 1;
+            Time::create([
+                'name' => "Time".$r,
+                'id_jogo' => $request['id_jogo'],
+            ]);
+
+            for ($y = 0; $y < $qtdtime; $y++)
+            {
+                if($y == 0)
+                {
+                    $id_time = Time::where('id_jogo', $request['id_jogo'] )->max('id');
+                    Jogador_Times::create([
+                        'id_time' => $id_time,
+                        'id_jogador' => $gol[$y]['id'],
+                        'id_jogo' => $request['id_jogo'],
+                    ]);
+                    $arrg = array_shift($gol);
+                }
+                else
+                {
+                    $r = $y - $y;
+                    $id_time = Time::where('id_jogo', $request['id_jogo'] )->max('id');
+                    Jogador_Times::create([
+                        'id_time' => $id_time,
+                        'id_jogador' => $jog[$r]['id'],
+                        'id_jogo' => $request['id_jogo'],
+                    ]);
+                    $arrg = array_shift($jog);
+                }
+            }
+        }
+        dd($jog);
+        $times = Time::where('id_jogo', $request['id_jogo'])->get();
+        $jogadorTimes = DB::table('times')
+            ->join('jogadors', 'jogadors.id', 'times.id_jogador')
+            ->select('jogadors.id', 'jogadors.name', 'times.name')
+            ->where('times.id', $times->id)
+            ->get();
+        return view('sorteio.resultado', compact('times', 'jogadorTimes'));
     }
 }

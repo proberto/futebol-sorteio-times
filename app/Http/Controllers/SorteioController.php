@@ -105,7 +105,6 @@ class SorteioController extends Controller
                 }
             }
         }
-        dd($jog);
         $times = Time::where('id_jogo', $request['id_jogo'])->get();
         $jogadorTimes = DB::table('times')
             ->join('jogadors', 'jogadors.id', 'times.id_jogador')
